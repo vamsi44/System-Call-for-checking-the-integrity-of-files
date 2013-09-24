@@ -1,0 +1,47 @@
+Assignment 1
+
+Name : Surya Rama Vamsi Varanasi
+Student Id: 108661822
+Email: varanasi.vamsi@gmail.com
+
+
+I have included the following files in the submission:
+
+1. sys_xintegrity.c - Contains the kernel code
+2. xhw1.c - contains the user level code
+3. xstructs.h - contains the structures defined for all the three modes
+4. kernel.config - Contains the configuration of my kernel 3.2
+5. password.txt- contains the hard coded password for user authentication
+6. Readme 
+
+
+Explanation:
+
+1. xhw1.c
+
+I first check for the mode that is given in the command line argument and then I will check if the mode is either 1,2,3 , if it matches then it goes in the one of these three modes else it prints out a message saying you have given wrong arguments. 
+
+Mode 1 : In mode 1 I take the inputs from the command line as mode and the filename . I will pass them to in the structure that is defined for the mode and pass that structure to the system call . I will print the buffer in which the md5 sum is returned and also the system call return value. System call returns 0 on success and error value on failure
+
+Mode 2 - In this mode I will take the inputs from the command line as mode, filename and my hardcoded password used in mode 2 for user authentication. I will print the md5 sum that has been set by the mode 2 and also the return value for system call. System call returns 0 on success and -1 on failure.
+
+Mode 3 - In this mode I will take the inputs from the command line as mode, filename, integer value for the mode for the file i.e. 64 for O_CREAT or 512 for O_TRUNC , I will take another integer value for the flag to the creat mode such as S_IRUSR or S_IWUSR . I will print out the return values of the system in case of success or failure . System call returns the File descriptor on success and the error value in case of failure.
+
+
+2. sys_xintegrity.c
+
+I will first check for the args that is passed from the system call . If it is Null then I will return 0 else I will first copy the first byte and check for the value that is present in that . If it matches the either of 1,2,3 modes then I will proceed accordingly.
+
+Mode 1 : It will copy the user arguments in the kernel and then using vfs_getxattr it will copy the specified attribute in the buffer which is again returned to the user . It will also print the value of the md5 checksum attribute that is copied to the user from the kernel. I have specified the name of the attribute as user.md5sumcheck.
+
+Mode 2 : It will also copy the arguments from the user into the kernel and It will check for the password passed from the user . If the password matches the password hardcoded in the kernel it will then perform checks to open the file in order to calculate the checksum . if the file doesn't exist then it will return an error or else it will calculate the checksum of the file incrementally (for PAGE_SIZE) and using vfs_setxattr it will set the attribute to the file under the name user.md5checksum and copy that value into the buffer using vfs_getxattr and pass it to the user.
+
+Mode 3: It will copy the arguments from the user into the kernel. It will check for the file mode to open , if the file doesn't exist it will either return an error or If the file doesn't exist and the user has specified the O_CREAT mode it will create a file and return the file descriptor to the system call. It also checks for the previous checksum that is set and again calculates the checksum if both match then it will return the file descriptor else it will return an appropriate error.
+
+
+Testing:
+
+I have tested the code in the following manner . i have first issued mode 3 along with O_CREAT flag and then . I have calculated the checksum for the file that is created and then I used mode 1 to return the check sum that has been set by mode 2.
+
+
+
